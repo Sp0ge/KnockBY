@@ -44,12 +44,13 @@ class Switch:
                     
             case "set":
                 try:
-                    net_scanner().port_scan(command[1])
+                    tool = __import__(f"tools.{str(command[1])}", fromlist=["Main"])
+                    tool.run()
                 except Exception as e:
                     if "--debug" in sys.argv:
                         print(e)
                     else:     
-                        self.main_menu("\n Require 1 args (port_scan [ip]) \n port_scan 127.0.0.1 \n")
+                        self.main_menu("\n[ Module fatal error ]\n")
             
     def tool_select(self,tool):
         pass

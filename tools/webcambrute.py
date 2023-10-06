@@ -1,1 +1,0 @@
-about = "bruteforcing webcams by http/https"

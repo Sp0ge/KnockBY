@@ -34,7 +34,7 @@ class MainUtilMenu(NetworkTools, Switch):
     def quit(self):
         self.clear_terminal()
         if input(f"QUIT? y/N >>").lower() == "y":
-            sys.exit(0)
+            self.running = False
         else:
             self.main_menu()
         
