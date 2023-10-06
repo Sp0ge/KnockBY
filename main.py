@@ -21,6 +21,8 @@ class MainUtilMenu(NetworkTools, Switch):
         while self.running:
             if warning is not None:
                 print(f"\n Warning - [ {warning} ] \n")
+                warning = None
+                
             command = input(f"{str(self.hostname)}>>")
             if command == "quit": self.quit()
             if command == "help": self.help()
@@ -43,6 +45,8 @@ class MainUtilMenu(NetworkTools, Switch):
             ["help","show this menu"],
             ["net_scan [lan] [port]", "discovering all devices in local network and open port on it"],
             ["port_scan [ip]", "discovering all open ports on target"],
+            ["set [tool]", "enter tool to use"],
+            ["show", "show tools"],
             ["quit", "close menu"],
             
         ]

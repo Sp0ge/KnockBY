@@ -46,7 +46,7 @@ class net_scanner:
         s.close()
         if ans == 0:
             result.append([port])
-    
+            
     def port_scan(self, ip):
         result = []
         threads = []
