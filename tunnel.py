@@ -32,12 +32,13 @@ class Switch:
                         tool = tool.replace(".py","")
                         try:
                             mod = __import__(f"tools.{tool}", fromlist=["about"])
+                            table.append([tool,mod.about])
                         except Exception as e:
                             if "--debug" in sys.argv:
                                 print(e)
                             else: 
                                 print(f"[ {tool} load Fail ]", end="\n")
-                        table.append([tool,mod.about])
+                        
                         
                                              
                 print(tabulate.tabulate(table, headers=["Tool","Description"], tablefmt="simple_grid"))
