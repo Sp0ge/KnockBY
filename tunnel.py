@@ -12,7 +12,7 @@ class Switch:
                     net_scanner().discover(self.ip[int(command[1])], command[2])
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback)
+                        print(e.with_traceback())
                     else:     
                         self.main_menu("\n Require 2 args (net_scan [lan] [ports]) \n net_scan 0 80,443,22 \n")
                     
@@ -21,35 +21,32 @@ class Switch:
                     net_scanner().port_scan(command[1])
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e)
+                        print(e.with_traceback())
                     else:     
                         self.main_menu("\n Require 1 args (port_scan [ip]) \n port_scan 127.0.0.1 \n")
+                        
             case "show":
                 table = []
                 for tool in os.listdir("./tools"):
-                    if ".py" in tool:
-                        
+                    if ".py" in tool:  
                         tool = tool.replace(".py","")
                         try:
                             mod = __import__(f"tools.{tool}", fromlist=["about"])
                             table.append([tool,mod.about])
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e)
+                                print(e.with_traceback())
                             else: 
-                                print(f"[ {tool} load Fail ]", end="\n")
-                        
-                        
-                                             
+                                print(f"[ {tool} load Fail ]", end="\n")                             
                 print(tabulate.tabulate(table, headers=["Tool","Description"], tablefmt="simple_grid"))
                     
-            case "set":
+            case "use":
                 try:
-                    tool = __import__(f"tools.{str(command[1])}", fromlist=["Main"])
-                    tool.run()
+                    tool = __import__(f"tools.{str(command[1])}", fromlist=["main"])
+                    tool.main().run()
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e)
+                        print(e.with_traceback())
                     else:     
                         self.main_menu("\n[ Module fatal error ]\n")
             

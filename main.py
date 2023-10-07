@@ -45,7 +45,7 @@ class MainUtilMenu(NetworkTools, Switch):
             ["help","show this menu"],
             ["net_scan [lan] [port]", "discovering all devices in local network and open port on it"],
             ["port_scan [ip]", "discovering all open ports on target"],
-            ["set [tool]", "enter tool to use"],
+            ["use [tool]", "enter tool to use"],
             ["show", "show tools"],
             ["quit", "close menu"],
             
