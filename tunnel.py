@@ -46,7 +46,7 @@ class Switch:
                     tool.main().run()
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback)
+                        print(e.with_traceback(e))
                     else:     
                         self.main_menu("\n[ Module fatal error ]\n")
             

