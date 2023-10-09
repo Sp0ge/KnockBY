@@ -1,5 +1,5 @@
-from network import NetworkTools
-from tunnel import Switch
+from bin.network import NetworkTools
+from bin.tunnel import Switch
 import os
 import tabulate
 import sys
@@ -22,8 +22,7 @@ class MainUtilMenu(NetworkTools, Switch):
             if warning is not None:
                 print(f"\n Warning - [ {warning} ] \n")
                 warning = None
-                
-            command = input(f"{str(self.hostname)}>>")
+            command = input(f"$[KnockBy]~{str(self.hostname)}>>")
             if command == "quit": self.quit()
             if command == "help": self.help()
             if command == "clear": self.clear_terminal()
@@ -52,12 +51,3 @@ class MainUtilMenu(NetworkTools, Switch):
         ]
             
         print(tabulate.tabulate(help, tablefmt="simple_grid"))
-    
-if __name__ == "__main__":
-    if "--debug" in sys.argv:
-        MainUtilMenu().run()
-    else:
-        try:  
-            MainUtilMenu().run()
-        except Exception as e:
-            print("You catch Fatal error!")

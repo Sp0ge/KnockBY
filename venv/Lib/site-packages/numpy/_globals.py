@@ -17,7 +17,7 @@ motivated this module.
 """
 import enum
 
-from ._utils import set_module as _set_module
+from _utils import set_module as _set_module
 
 __all__ = ['_NoValue', '_CopyMode']
 

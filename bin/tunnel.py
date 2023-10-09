@@ -1,4 +1,4 @@
-from scanners import net_scanner
+from bin.scanners import net_scanner
 import sys
 import os
 import tabulate
@@ -49,6 +49,5 @@ class Switch:
                         print(e.with_traceback(e))
                     else:     
                         self.main_menu("\n[ Module fatal error ]\n")
-            
     def tool_select(self,tool):
         pass
