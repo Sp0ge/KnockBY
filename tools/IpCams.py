@@ -172,6 +172,7 @@ class main(object):
             if self.password_list is None:
                 self.password_list = "admin"
                 
+            print(self.founded_targets)
             url = RtspBrute(self.founded_targets, self.login_list, self.password_list, self.port ).run() 
             if url is not None:
                 self.brute_result.append(url)
