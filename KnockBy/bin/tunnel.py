@@ -3,6 +3,8 @@ import sys
 import os
 import tabulate
 
+BASE_DIR = os.getcwd()
+
 class Switch:
     def switch_main(self, command):
         command = command.split(" ")
@@ -27,7 +29,7 @@ class Switch:
                         
             case "show":
                 table = []
-                for tool in os.listdir("./tools"):
+                for tool in os.listdir(os.path.join(BASE_DIR, "KnockBY/tools/")):
                     if ".py" in tool:  
                         tool = tool.replace(".py","")
                         try:
