@@ -6,11 +6,13 @@ import re
 import queue
 import time
 import os
-os.environ["OPENCV_LOG_LEVEL"]="SILENT"
 import cv2
 import sys
-
 from pathlib import Path
+
+
+os.environ["OPENCV_LOG_LEVEL"]="SILENT"
+
 
 about = "bruteforcing webcams by http/https"
 class main(object):
@@ -41,7 +43,7 @@ class main(object):
                             if "--debug" in sys.argv:
                                 print(e.with_traceback(e))
                             else:
-                                print(f"[ value must be list]")
+                                print("[ value must be list]")
                                 
                     case "port":
                         try:
@@ -51,7 +53,7 @@ class main(object):
                             if "--debug" in sys.argv:
                                 print(e.with_traceback(e))
                             else:
-                                print(f"[ value must be num]")
+                                print("[ value must be num]")
                     case "scan_timeout":
                         try:
                             self.scan_timeout = int(command[2])
@@ -60,7 +62,7 @@ class main(object):
                             if "--debug" in sys.argv:
                                 print(e.with_traceback(e))
                             else:
-                                print(f"[ value must be num]")
+                                print("[ value must be num]")
                     case "brute_threads":
                         try:
                             self.brute_threads = int(command[2])
@@ -69,7 +71,7 @@ class main(object):
                             if "--debug" in sys.argv:
                                 print(e.with_traceback(e))
                             else:
-                                print(f"[ value must be num]")
+                                print("[ value must be num]")
                     case "password_list":
                         try:
                             self.password_list = str(command[2])
@@ -78,7 +80,7 @@ class main(object):
                             if "--debug" in sys.argv:
                                 print(e.with_traceback(e))
                             else:
-                                print(f"[ value must be path]")
+                                print("[ value must be path]")
                     case "login_list":
                         try:
                             self.login_list = str(command[2])
@@ -87,7 +89,7 @@ class main(object):
                             if "--debug" in sys.argv:
                                 print(e.with_traceback(e))
                             else:     
-                                print(f"[ value must be path]")
+                                print("[ value must be path]")
                     
             if command[0] == "load_targets":
                 try:
@@ -127,6 +129,7 @@ class main(object):
                 os.system("cls||clear")
             
     def module_scan_run(self):
+        os.remove("temp/IpCams_scan_result.txt")
         for ip_range in self.ip_ranges: 
             self.scan_for_targets(ip_range)
         with open("temp/IpCams_scan_result.txt", "w") as f:
@@ -306,6 +309,7 @@ class RtspBrute(object):
                     if res not in file:
                         print(res)
                         self.brute_result = res
+                        os.remove("temp/IpCams_brute_result.txt")
                         with open("temp/IpCams_brute_result.txt", "a") as f:
                             f.writelines(f"\n{res}")
                 else:
@@ -393,7 +397,7 @@ class RTSP_Viewer(object):
         run = True
         while run and not self.kill_threads:
             ret ,frame = video.read()
-            if ret == False:
+            if ret is not False:
                 if path_num == len(path_list):
                     break
                 else:

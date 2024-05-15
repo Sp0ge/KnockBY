@@ -7,5 +7,5 @@ if __name__ == "__main__":
     else:
         try:  
             MainUtilMenu().run()
-        except Exception as e:
+        except Exception:
             print("You catch Fatal error!")

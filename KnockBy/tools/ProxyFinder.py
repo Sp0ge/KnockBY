@@ -91,7 +91,7 @@ masscheck  - checking all proxy in list if online and type of [http / https]
                 proxies=proxy
                 )
             status["protocol"] = "https"
-        except Exception as e:
+        except Exception:
             pass
             
         try:
@@ -103,7 +103,7 @@ masscheck  - checking all proxy in list if online and type of [http / https]
                 proxies=proxy
                 )
             status["protocol"] = "http"
-        except Exception as e:
+        except Exception:
             pass
     
     

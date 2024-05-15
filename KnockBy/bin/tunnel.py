@@ -51,5 +51,8 @@ class Switch:
                         print(e.with_traceback(e))
                     else:     
                         self.main_menu("\n[ Module fatal error ]\n")
+            case _:
+                print("[ no such command ]")
+            
     def tool_select(self,tool):
         pass

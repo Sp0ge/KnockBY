@@ -2,7 +2,6 @@ from bin.network import NetworkTools
 from bin.tunnel import Switch
 import os
 import tabulate
-import sys
 
 class MainUtilMenu(NetworkTools, Switch):
     def __init__(self):
@@ -15,7 +14,6 @@ class MainUtilMenu(NetworkTools, Switch):
         self.main_menu()
 
     def main_menu(self, warning=None):
-        print(self.get_network_table(["ip","mac","hostname"]), end="\n\r")
         self.clear_terminal()
         print(self.get_network_table(["ip","mac","hostname"]), end="\n\r")
         while self.running:
@@ -23,16 +21,22 @@ class MainUtilMenu(NetworkTools, Switch):
                 print(f"\n Warning - [ {warning} ] \n")
                 warning = None
             command = input(f"$[KnockBy]~{str(self.hostname)}>>")
-            if command == "quit": self.quit()
-            if command == "help": self.help()
-            if command == "clear": self.clear_terminal()
-            self.switch_main(command)
+            if command == "quit" or command == "exit":
+                self.quit()
+            elif command == "help":
+                self.help()
+            elif command == "clear":
+                self.clear_terminal()
+            else:
+                self.switch_main(command)
+            
     def clear_terminal(self):
         os.system("cls||clear")
+        print(self.get_network_table(["ip","mac","hostname"]), end="\n\r")
     
     def quit(self):
         self.clear_terminal()
-        if input(f"QUIT? y/N >>").lower() == "y":
+        if input("QUIT? y/N >>").lower() == "y":
             self.running = False
         else:
             self.main_menu()

@@ -3,7 +3,6 @@ import tqdm
 import tabulate
 import threading
 import os
-import time
 
 class net_scanner:
     def discover(self, network, ports):
