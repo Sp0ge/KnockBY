@@ -14,6 +14,7 @@ class MainUtilMenu(NetworkTools, Switch):
         self.main_menu()
 
     def main_menu(self, warning=None):
+        print(self.get_network_table(["ip","mac","hostname"]), end="\n\r")
         self.clear_terminal()
         print(self.get_network_table(["ip","mac","hostname"]), end="\n\r")
         while self.running:
@@ -32,7 +33,6 @@ class MainUtilMenu(NetworkTools, Switch):
             
     def clear_terminal(self):
         os.system("cls||clear")
-        print(self.get_network_table(["ip","mac","hostname"]), end="\n\r")
     
     def quit(self):
         self.clear_terminal()

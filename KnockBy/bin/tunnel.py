@@ -37,7 +37,7 @@ class Switch:
                             table.append([tool,mod.about])
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback())
+                                print(e.with_traceback(e))
                             else: 
                                 print(f"[ {tool} load Fail ]", end="\n")                             
                 print(tabulate.tabulate(table, headers=["Tool","Description"], tablefmt="simple_grid"))
@@ -48,7 +48,7 @@ class Switch:
                     tool.main().run()
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback(e))
+                        print(e)
                     else:     
                         self.main_menu("\n[ Module fatal error ]\n")
             case _:

@@ -2,6 +2,8 @@ import requests
 from threading import Thread
 import json
 import sys
+proxy = '41.128.148.79,83.169.17.201,98.175.31.195,50.231.104.58,50.172.75.122,37.27.81.120,45.12.31.147,172.67.163.198,69.84.182.39,172.67.167.86,185.162.231.87'
+
 
 about = "Find open proxy in internet"
 class main(object):
@@ -117,3 +119,4 @@ masscheck  - checking all proxy in list if online and type of [http / https]
             status["ip"] = f"{ip}"
              
         print(json.dumps(status, indent=4))
+        
