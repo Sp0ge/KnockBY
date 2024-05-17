@@ -29,7 +29,7 @@ class Switch:
                         
             case "show":
                 table = []
-                for tool in os.listdir(os.path.join(BASE_DIR, "KnockBY/tools/")):
+                for tool in os.listdir(os.path.join(BASE_DIR, os.path.normpath("tools"))):
                     if ".py" in tool:  
                         tool = tool.replace(".py","")
                         try:

@@ -13,6 +13,7 @@ from pathlib import Path
 
 os.environ["OPENCV_LOG_LEVEL"]="SILENT"
 
+BASE_DIR = os.path.abspath(os.getcwd())
 
 about = "bruteforcing webcams by http/https"
 class main(object):
@@ -122,20 +123,28 @@ class main(object):
             if command[0] == "view":
                 RTSP_Viewer().run()            
             
-            if command[0] == "quit":
+            if command[0] == "quit" or command[0] == "exit":
                 return 0
             
             if command[0] == "clear":
                 os.system("cls||clear")
             
     def module_scan_run(self):
-        os.remove("temp/IpCams_scan_result.txt")
+        try:
+            os.remove(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_scan_result.txt")))
+            with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")), 'w') as fp:
+                pass
+        except Exception:
+            pass
+        print(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_scan_result.txt")))
+        with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_scan_result.txt")), 'w') as fp:
+            pass
         for ip_range in self.ip_ranges: 
             self.scan_for_targets(ip_range)
-        with open("temp/IpCams_scan_result.txt", "w") as f:
+        with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_scan_result.txt")), "w") as f:
             for ip in self.founded_targets:
                 f.write(f"{ip}\n")
-            print("[ Result saved in temp/IpCams_scan_result.txt ]")
+            print("[ Result saved in ../temp/IpCams_scan_result.txt ]")
     
     def load_targets(self, path):
         with open(path, "r") as f:
@@ -146,6 +155,13 @@ class main(object):
 
 
     def module_brute_run(self):
+        try:
+            os.remove(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")))
+            with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")), 'w') as fp:
+                pass
+        except Exception:
+            pass
+        
         if len(self.founded_targets) > 0:
             if self.login_list is None:
                     self.login_list = "admin"
@@ -153,12 +169,11 @@ class main(object):
             if self.password_list is None:
                 self.password_list = "admin"
                 
-            url = RtspBrute("./temp/IpCams_scan_result.txt", self.login_list, self.password_list, self.port, self.brute_threads).run() 
+            url = RtspBrute(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_scan_result.txt")), self.login_list, self.password_list, self.port, self.brute_threads).run() 
             if url is not None:
                 self.brute_result.append(url)
-                print("[ Result saved in temp/IpCams_brute_result.txt ]")
+                print(f"[ Result saved in {os.path.join(BASE_DIR,os.path.normpath('temp/IpCams_brute_result.txt'))} ]")
                 
-            print(f"[ Total - {len(self.brute_result)} ]")
             
     def scan_for_targets(self, ip_range):
         range_start_end = ip_range.split("-")
@@ -273,7 +288,7 @@ class RtspBrute(object):
             return
 
     def brute_force(self):
-        with open("temp/IpCams_brute_result.txt", "r") as f:
+        with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")), "r") as f:
             file = f.readlines()
             
         while not q.empty():
@@ -295,7 +310,7 @@ class RtspBrute(object):
                                             if res not in file:
                                                 print(res)
                                                 self.brute_result = res
-                                                with open("temp/IpCams_brute_result.txt", "a") as f:
+                                                with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")), "a") as f:
                                                     f.writelines(f"\n{res}")
                                             pass
                                         if "401 Unauthorized" in data:
@@ -309,8 +324,7 @@ class RtspBrute(object):
                     if res not in file:
                         print(res)
                         self.brute_result = res
-                        os.remove("temp/IpCams_brute_result.txt")
-                        with open("temp/IpCams_brute_result.txt", "a") as f:
+                        with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")), "a") as f:
                             f.writelines(f"\n{res}")
                 else:
                     pass
@@ -386,7 +400,7 @@ class RTSP_Viewer(object):
             
             
     def get_rtsp_file(self):
-        with open("./temp/IpCams_brute_result.txt", "r") as f:
+        with open(os.path.join(BASE_DIR,os.path.normpath("temp/IpCams_brute_result.txt")), "r") as f:
             return f.readlines()
         
     def camera_capture(self, num, rtsp_list, path_list):
