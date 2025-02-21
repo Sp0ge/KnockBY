@@ -13,14 +13,8 @@ class main(object):
             try:
                 command = input("$[Bluetooth]>> ")
                 command = command.split(" ")
-                
-                if command[0] == "get":
-                    if command[1] == "devices":
-                        print(tabulate(self.devices, tablefmt="simple_grid"))
-                    elif command[1] == "good_proxy":
-                        pass
-                
-                elif command[0] == "scan":
+        
+                if command[0] == "scan":
                     self.scan_devices()
                     
                 elif command[0] == "help":
@@ -41,7 +35,6 @@ class main(object):
         help = [
             ["Commands","Description"],
             ["scan","scan for bluetooth devices"],
-            ["get","look values [devices]"],
         ]
         print(tabulate(help, tablefmt="simple_grid"))
     
