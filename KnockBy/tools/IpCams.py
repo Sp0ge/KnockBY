@@ -9,6 +9,7 @@ import os
 import cv2
 import sys
 from pathlib import Path
+import traceback
 
 
 os.environ["OPENCV_LOG_LEVEL"]="SILENT"
@@ -42,7 +43,7 @@ class main(object):
                             print(f"[ ip_ranges > {len(self.ip_ranges)} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else:
                                 print("[ value must be list]")
                                 
@@ -52,7 +53,7 @@ class main(object):
                             print(f"[ port > {self.port} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else:
                                 print("[ value must be num]")
                     case "scan_timeout":
@@ -61,7 +62,7 @@ class main(object):
                             print(f"[ scan_timeout > {self.scan_timeout} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else:
                                 print("[ value must be num]")
                     case "brute_threads":
@@ -70,7 +71,7 @@ class main(object):
                             print(f"[ brute_threads > {self.brute_threads} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else:
                                 print("[ value must be num]")
                     case "password_list":
@@ -79,7 +80,7 @@ class main(object):
                             print(f"[ password_list > {self.password_list} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else:
                                 print("[ value must be path]")
                     case "login_list":
@@ -88,7 +89,7 @@ class main(object):
                             print(f"[ login_list > {self.login_list} ]")
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else:     
                                 print("[ value must be path]")
                     
@@ -97,7 +98,7 @@ class main(object):
                     self.load_targets(command[1])
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback(e))
+                        print(traceback.format_exc())
                     else:  
                         print('[ print(f"[ value must be path]") ]')
             
@@ -370,7 +371,7 @@ class RTSP_Viewer(object):
                 _video_windows.append(win)
                 self.last_window = str(f'Camera_{camera_num}')
             except Exception as e:
-                print(e.with_traceback(e))
+                print(traceback.format_exc())
             command = str(input(f"cameras[now {camera_num}]>> ")).split(" ")
             
             if command[0] == "quit":

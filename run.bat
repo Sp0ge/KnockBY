@@ -34,7 +34,7 @@ if exist venv (
 )
 
 echo Creating new virtual environment...
-python -m venv venv
+python3.12 -m venv venv
 
 echo Installing dependencies from requirements.txt...
 call venv\Scripts\activate

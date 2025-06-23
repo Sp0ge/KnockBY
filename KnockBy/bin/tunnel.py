@@ -2,6 +2,7 @@ from bin.scanners import net_scanner
 import sys
 import os
 import tabulate
+import traceback
 
 BASE_DIR = os.getcwd()
 
@@ -14,7 +15,7 @@ class Switch:
                     net_scanner().discover(self.ip[int(command[1])], command[2])
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback())
+                        print(traceback.format_exc())
                     else:     
                         self.main_menu("\n Require 2 args (net_scan [lan] [ports]) \n net_scan 0 80,443,22 \n")
                     
@@ -23,7 +24,7 @@ class Switch:
                     net_scanner().port_scan(command[1])
                 except Exception as e:
                     if "--debug" in sys.argv:
-                        print(e.with_traceback())
+                        print(traceback.format_exc())
                     else:     
                         self.main_menu("\n Require 1 args (port_scan [ip]) \n port_scan 127.0.0.1 \n")
                         
@@ -37,7 +38,7 @@ class Switch:
                             table.append([tool,mod.about])
                         except Exception as e:
                             if "--debug" in sys.argv:
-                                print(e.with_traceback(e))
+                                print(traceback.format_exc())
                             else: 
                                 print(f"[ {tool} load Fail ]", end="\n")                             
                 print(tabulate.tabulate(table, headers=["Tool","Description"], tablefmt="simple_grid"))

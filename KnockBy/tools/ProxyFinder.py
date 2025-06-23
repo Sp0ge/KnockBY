@@ -2,6 +2,8 @@ import requests
 from threading import Thread
 import json
 import sys
+import traceback
+
 proxy = '41.128.148.79,83.169.17.201,98.175.31.195,50.231.104.58,50.172.75.122,37.27.81.120,45.12.31.147,172.67.163.198,69.84.182.39,172.67.167.86,185.162.231.87'
 
 
@@ -46,7 +48,7 @@ class main(object):
                     print("[no such command]")
             except Exception as e:
                 if "--debug" in sys.argv:
-                        print(e.with_traceback(e))
+                        print(traceback.format_exc())
                 else:
                     print('[ Error ]')
                 
